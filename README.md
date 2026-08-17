@@ -49,6 +49,19 @@ GET /api/stats
 
 `/api/reports` accepts `q`, `platform`, `severity`, `class`, `researcher`, `program`, `year`, `kind`, `sort`, `limit`, and `offset`. The maximum page size is 100. CORS is enabled for read-only use.
 
+## API security
+
+- The API is read-only and accepts only `GET`, `HEAD`, and preflight `OPTIONS` requests.
+- API routes are limited to 120 requests per 60 seconds per client by default. Successful responses include `RateLimit-Limit`, `RateLimit-Remaining`, and `RateLimit-Reset`; rejected requests return `429` and `Retry-After`.
+- Configure limits with `RATE_LIMIT_MAX` and `RATE_LIMIT_WINDOW_MS`.
+- Query URLs, parameter counts, parameter lengths, page size, offset, and sort values are bounded server-side.
+- Static hosting uses an explicit allowlist. Repository files, source scripts, environment files, and `.git` paths cannot be served.
+- The catalog is parsed as JSON rather than executed as JavaScript by the server.
+- Responses include content-type, framing, referrer, permissions, resource-policy, and Content Security Policy headers.
+- HTTP header size, header count, request duration, socket lifetime, and requests per socket are bounded.
+
+The built-in limiter is intentionally dependency-free and stores counters in process memory. For a multi-instance deployment, enforce an additional shared limit at the CDN, reverse proxy, or API gateway. Leave `TRUST_PROXY` disabled unless the server is behind a trusted proxy that overwrites `X-Forwarded-For`; otherwise clients can spoof addresses. Production deployments should terminate HTTPS at a trusted proxy or hosting provider.
+
 ## Data sources
 
 - HackerOne structured public-disclosure index: `ajaysenr/HackerOne-Disclosed-Reports`
