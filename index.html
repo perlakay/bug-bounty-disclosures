@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search more than 11,000 public vulnerability disclosures and competitive security reports.">
+  <title>Disclosure Index — Open Security Research Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top">Disclosure Index</a>
+    <nav aria-label="Primary"><a href="#library">Catalog</a><a href="#sources">Collections</a><a href="#api">API</a><a href="#method">About</a></nav>
+    <a class="api-button" href="#api">API documentation</a>
+  </header>
+  <main id="top">
+    <section class="catalog-intro" aria-labelledby="page-title">
+      <div><h1 id="page-title">Public vulnerability disclosures</h1><p class="collection-meta">Platform reports, platform-associated writeups, and competitive security audits · Updated 16 August 2026</p></div>
+      <dl class="collection-stats" aria-label="Collection statistics"><div><dt>Records</dt><dd id="stat-reports">—</dd></div><div><dt>Researchers</dt><dd id="stat-researchers">—</dd></div><div><dt>Collections</dt><dd id="stat-platforms">—</dd></div><div><dt>With bounty data</dt><dd id="stat-bounties">—</dd></div></dl>
+    </section>
+    <section class="library" id="library">
+      <div class="search-wrap">
+        <form class="search" id="search-form" role="search"><label for="search-input">Search catalog</label><div class="search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.4-4.4m2.4-5.1a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><input id="search-input" type="search" placeholder="Title, researcher, program, weakness, or CVE" autocomplete="off"><kbd>/</kbd></div></form>
+      </div>
+      <div class="source-bar" id="sources" aria-label="Filter by collection"><span class="source-bar-label">Collection</span><button class="source-pill active" type="button" data-platform="all"><span>All</span><b id="count-all">0</b></button><div id="source-pills"></div></div>
+      <div class="catalog-shell">
+        <aside class="filters">
+          <div class="filter-title"><span>Refine results</span><button id="reset-filters" type="button">Clear all</button></div>
+          <label>Subject<select id="class-filter"><option value="">All subjects</option></select></label><label>Severity<select id="severity-filter"><option value="">All severities</option></select></label><label>Publication year<select id="year-filter"><option value="">Any year</option></select></label><label>Material type<select id="kind-filter"><option value="">All types</option></select></label>
+          <label class="saved-toggle"><input id="saved-only" type="checkbox"><span>Saved records only</span></label>
+          <div class="collection-note"><b>Scope note</b><p>Official feeds and archived platform-attributed disclosures. Every record links to its public source.</p><a href="#method">Collection policy</a></div>
+        </aside>
+        <section class="results" aria-label="Search results">
+          <header class="results-head"><p><strong id="result-count">0 records</strong><span id="result-label"> across all collections</span></p><div><label class="sr-only" for="sort-select">Sort results</label><select id="sort-select"><option value="recent">Date: newest</option><option value="popular">Most upvoted</option><option value="bounty">Bounty: highest</option><option value="title">Title: A–Z</option></select><button id="export-button" type="button">Download CSV</button></div></header>
+          <div class="active-filters" id="active-filters"></div><div class="record-columns" aria-hidden="true"><span>Source</span><span>Citation</span><span>Date / details</span></div><div class="report-list" id="report-list"></div>
+          <div class="empty" id="empty-state" hidden><span>∅</span><h2>No records found</h2><p>Try a broader search or clear the filters.</p></div><button class="load-more" id="load-more" type="button" hidden>Load 36 more <span>↓</span></button>
+        </section>
+      </div>
+    </section>
+    <section class="api-section" id="api">
+      <div class="section-heading"><p class="eyebrow">API</p><h2>Query the catalog</h2><p>Read-only JSON with field filters, sorting, pagination, and CORS.</p></div>
+      <div class="api-docs"><div class="endpoint"><span>GET</span><code>/api/reports?q=xss&amp;severity=high&amp;limit=25</code><button type="button" data-copy="/api/reports?q=xss&severity=high&limit=25">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/reports/{id}</code><button type="button" data-copy="/api/reports/{id}">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/stats</code><button type="button" data-copy="/api/stats">Copy</button></div><p><b>Filters</b> <code>q</code> <code>platform</code> <code>severity</code> <code>class</code> <code>researcher</code> <code>program</code> <code>year</code> <code>kind</code> <code>sort</code> <code>limit</code> <code>offset</code></p></div>
+    </section>
+    <section class="method" id="method"><div class="section-heading"><p class="eyebrow">Method</p><h2>Collection policy</h2></div><div class="method-grid"><article><b>01</b><h3>Public records</h3><p>Platform disclosures, platform-associated writeups, and published audit results.</p></article><article><b>02</b><h3>Source links</h3><p>Every record retains its canonical URL, attribution, source, and date.</p></article><article><b>03</b><h3>Subject indexing</h3><p>Normalized subjects support cross-platform search; source labels remain when available.</p></article></div></section>
+  </main>
+  <footer><p>11,304 records · Updated 16 August 2026</p><nav aria-label="Footer"><a href="#sources">Sources</a><a href="#api">API</a><a href="#method">Collection policy</a></nav></footer>
+  <dialog id="report-dialog"><button class="dialog-close" type="button" aria-label="Close">×</button><div id="dialog-content"></div></dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="data/catalog.js?v=20260816"></script><script src="app.js?v=20260816c"></script>
+</body>
+</html>

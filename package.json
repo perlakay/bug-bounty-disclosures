@@ -1,0 +1,14 @@
+{
+  "name": "disclosure-index",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check server.mjs && node --check scripts/build-catalog.mjs && node --check scripts/update-code4rena.mjs && node --check scripts/update-hackerone.mjs && node --check scripts/update-historical-platforms.mjs",
+    "update:hackerone": "node scripts/update-hackerone.mjs",
+    "update:code4rena": "node scripts/update-code4rena.mjs",
+    "update:historical-platforms": "node scripts/update-historical-platforms.mjs",
+    "update:platforms": "npm run update:hackerone && npm run update:code4rena && npm run update:historical-platforms"
+  }
+}
