@@ -31,10 +31,32 @@ const reports = loadCatalog();
 const lower = value => String(value ?? "").toLowerCase();
 const year = value => String(value ?? "").match(/\d{4}/)?.[0] || "";
 const exact = (value, wanted) => !wanted || lower(value) === lower(wanted);
-const searchRows = reports.map(report => ({ report, haystack: `${report.title} ${report.program} ${report.researcher} ${report.platform} ${report.vulnerabilityClass} ${report.weakness || ""} ${report.severity} ${report.kind} ${report.indexedVia} ${(report.cves || []).join(" ")}`.toLowerCase() }));
-const reportsById = new Map(reports.map(report => [report.id, report]));
+function technologyFor(report) {
+  if (report.technology) return report.technology;
+  const text = lower(`${report.title} ${report.program} ${report.weakness || ""} ${report.vulnerabilityClass || ""} ${report.kind || ""}`);
+  if (/smart contract|web3|defi|blockchain|solidity|evm|protocol|token|nft\b/.test(text) || ["Code4rena", "Immunefi"].includes(report.platform)) return "Smart contract";
+  if (/\b(android|ios|iphone|ipad|mobile|apk|deep link|deeplink)\b/.test(text)) return "Mobile app";
+  if (/\b(api|graphql|rest api|endpoint|webhook)\b/.test(text)) return "API";
+  if (/\b(source code|repository|github|gitlab|package|dependency|npm|pip|cli)\b/.test(text)) return "Source code";
+  if (/\b(hardware|firmware|router|device|iot|bluetooth|wifi)\b/.test(text)) return "Hardware";
+  if (/\b(web|website|browser|subdomain|domain|cookie|http|url|xss|csrf|ssrf|sql)\b/.test(text)) return "Web app";
+  return "Other";
+}
+function statusFor(report) {
+  if (report.outcome) return report.outcome;
+  const text = lower(`${report.title} ${report.sourceOutcome || ""}`);
+  if (/\bduplicate\b/.test(text)) return "Duplicate";
+  if (/\bnot[ -]applicable\b|\bn\/?a\b/.test(text)) return "Not applicable";
+  if (/\binformative\b|\binformational\b/.test(text)) return "Informational";
+  if (/\bspam\b/.test(text)) return "Spam";
+  return "Unspecified";
+}
+const enrichedReports = reports.map(report => ({ ...report, technology: technologyFor(report), status: statusFor(report) }));
+const searchRows = enrichedReports.map(report => ({ report, haystack: `${report.title} ${report.program} ${report.researcher} ${report.platform} ${report.technology} ${report.status} ${report.vulnerabilityClass} ${report.weakness || ""} ${report.severity} ${report.kind} ${report.indexedVia} ${(report.cves || []).join(" ")}`.toLowerCase() }));
+const reportsById = new Map(enrichedReports.map(report => [report.id, report]));
 const countBy = key => Object.fromEntries([...new Set(reports.map(report => report[key]).filter(Boolean))].sort().map(value => [value, reports.filter(report => report[key] === value).length]));
-const statistics = { total: reports.length, researchers: new Set(reports.map(report => report.researcher).filter(Boolean)).size, withBountyData: reports.filter(report => report.bounty).length, byPlatform: countBy("platform"), bySeverity: countBy("severity"), byType: countBy("kind") };
+const countEnrichedBy = key => Object.fromEntries([...new Set(enrichedReports.map(report => report[key]).filter(Boolean))].sort().map(value => [value, enrichedReports.filter(report => report[key] === value).length]));
+const statistics = { total: reports.length, researchers: new Set(reports.map(report => report.researcher).filter(Boolean)).size, withBountyData: reports.filter(report => report.bounty).length, byPlatform: countBy("platform"), byTechnology: countEnrichedBy("technology"), byStatus: countEnrichedBy("status"), bySeverity: countBy("severity"), byType: countBy("kind") };
 
 const staticFiles = new Map([
   ["/", { file: "index.html", type: "text/html; charset=utf-8", cache: "no-cache" }],
@@ -108,7 +130,8 @@ function boundedInteger(value, fallback, minimum, maximum) {
 
 function queryReports(params) {
   const q = lower(params.get("q")).trim();
-  const filtered = searchRows.filter(({ report, haystack }) => (!q || haystack.includes(q)) && exact(report.platform, params.get("platform")) && exact(report.severity, params.get("severity")) && exact(report.vulnerabilityClass, params.get("class")) && exact(report.researcher, params.get("researcher")) && exact(report.program, params.get("program")) && exact(year(report.disclosedAt), params.get("year")) && exact(report.kind, params.get("kind"))).map(row => row.report);
+  const status = params.get("status");
+  const filtered = searchRows.filter(({ report, haystack }) => (!q || haystack.includes(q)) && exact(report.platform, params.get("platform")) && exact(report.technology, params.get("technology")) && (!status || (lower(status) === "paid" ? Number(report.bounty) > 0 : exact(report.status, status))) && exact(report.severity, params.get("severity")) && exact(report.vulnerabilityClass, params.get("class")) && exact(report.researcher, params.get("researcher")) && exact(report.program, params.get("program")) && exact(year(report.disclosedAt), params.get("year")) && exact(report.kind, params.get("kind"))).map(row => row.report);
   const sort = params.get("sort") || "recent";
   if (sort === "title") filtered.sort((a, b) => a.title.localeCompare(b.title));
   else if (sort === "bounty") filtered.sort((a, b) => (b.bounty || 0) - (a.bounty || 0));
@@ -121,7 +144,7 @@ function api(req, res, url) {
   const head = req.method === "HEAD";
   const parameterError = validateParameters(url.searchParams);
   if (parameterError) return sendJson(res, 400, { error: parameterError }, head, { "Cache-Control": "no-store" });
-  if (url.pathname === "/api" || url.pathname === "/api/") return sendJson(res, 200, { name: "Disclosure Index API", version: "1.1", rateLimit: { requests: RATE_LIMIT_MAX, windowMs: RATE_LIMIT_WINDOW_MS }, endpoints: ["GET /api/reports", "GET /api/reports/{id}", "GET /api/stats"], filters: ["q", "platform", "severity", "class", "researcher", "program", "year", "kind", "sort", "limit", "offset"] }, head);
+  if (url.pathname === "/api" || url.pathname === "/api/") return sendJson(res, 200, { name: "Disclosure Index API", version: "1.2", rateLimit: { requests: RATE_LIMIT_MAX, windowMs: RATE_LIMIT_WINDOW_MS }, endpoints: ["GET /api/reports", "GET /api/reports/{id}", "GET /api/stats"], filters: ["q", "platform", "technology", "status", "severity", "class", "researcher", "program", "year", "kind", "sort", "limit", "offset"] }, head);
   if (url.pathname === "/api/stats") return sendJson(res, 200, statistics, head);
   if (url.pathname === "/api/reports") {
     const limit = boundedInteger(url.searchParams.get("limit"), 25, 1, 100);

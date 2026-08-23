@@ -20,7 +20,8 @@ The 4,260 unrelated independent-blog entries from PentesterLand were removed bec
 ## Features
 
 - Search across titles, programs, researchers, weakness labels, CVEs, and platforms
-- Platform, vulnerability class, severity, year, and report-type filtering
+- Platform, technology/asset type, report status, vulnerability class, severity, year, and report-type filtering
+- Light and dark themes with saved system/user preference
 - Lazy rendering in batches of 36 for a responsive 11K-record catalog
 - Bounty, popularity, recency, and alphabetical sorting
 - Local bookmarks and CSV export
@@ -47,7 +48,7 @@ GET /api/reports/{id}
 GET /api/stats
 ```
 
-`/api/reports` accepts `q`, `platform`, `severity`, `class`, `researcher`, `program`, `year`, `kind`, `sort`, `limit`, and `offset`. The maximum page size is 100. CORS is enabled for read-only use.
+`/api/reports` accepts `q`, `platform`, `technology`, `status`, `severity`, `class`, `researcher`, `program`, `year`, `kind`, `sort`, `limit`, and `offset`. Technology is normalized to API, web app, mobile app, smart contract, source code, hardware, or other. Status accepts source outcomes such as `duplicate` and `not applicable`; `paid` selects records with a reported bounty. The maximum page size is 100. CORS is enabled for read-only use.
 
 ## API security
 
@@ -83,7 +84,7 @@ HISTORICAL_PLATFORM_INDEX=/path/to/list-of-bug-bounty-writeups.md \
 node scripts/build-catalog.mjs
 ```
 
-Refresh the maintained HackerOne index and Code4rena's official reports page:
+Refresh the maintained public feeds manually:
 
 ```bash
 npm run update:platforms

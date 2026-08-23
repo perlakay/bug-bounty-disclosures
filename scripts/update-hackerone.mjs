@@ -1,14 +1,14 @@
-import fs from "node:fs";
 import path from "node:path";
-import vm from "node:vm";
+import { assertResponseOrigin, deduplicate, normalizeOutcome, readCatalog, readLimitedJson, writeCatalog } from "./catalog-utils.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const catalogPath = path.join(root, "data/catalog.js");
 const sourceUrl = "https://raw.githubusercontent.com/ajaysenr/HackerOne-Disclosed-Reports/main/index.json";
-const response = await fetch(sourceUrl, { headers: { "User-Agent": "DisclosureIndex/1.0 (+public metadata index)" } });
+const response = await fetch(sourceUrl, { headers: { "User-Agent": "DisclosureIndex/1.0 (+public metadata index)" }, signal: AbortSignal.timeout(30000) });
 if (!response.ok) throw new Error(`HackerOne index returned HTTP ${response.status}`);
-const sourceRows = await response.json();
-if (!Array.isArray(sourceRows) || sourceRows.length < 9000) throw new Error(`Safety check failed: only ${sourceRows?.length || 0} HackerOne records found`);
+assertResponseOrigin(response, ["https://raw.githubusercontent.com"]);
+const sourceRows = await readLimitedJson(response, 25_000_000);
+if (!Array.isArray(sourceRows) || sourceRows.length < 9000 || sourceRows.length > 15000) throw new Error(`Safety check failed: unexpected HackerOne record count ${sourceRows?.length || 0}`);
 
 const classify = (value = "") => {
   const text = value.toLowerCase();
@@ -16,12 +16,9 @@ const classify = (value = "") => {
   return rules.find(([, pattern]) => pattern.test(text))?.[0] || "Other";
 };
 const clean = value => String(value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
-const incoming = sourceRows.map(item => ({ id:`h1-${item.id}`,title:clean(item.title)||"Untitled disclosure",program:clean(item.program)||"Unlisted program",researcher:clean(item.reporter)||"Anonymous",platform:"HackerOne",url:item.url,vulnerabilityClass:classify(`${item.weakness||""} ${item.title||""}`),weakness:clean(item.weakness)||null,severity:item.severity?item.severity[0].toUpperCase()+item.severity.slice(1):"Unrated",bounty:Number(item.bounty)||null,disclosedAt:item.disclosed_at||null,votes:Number(item.votes)||0,cves:item.cve_ids||[],kind:"Platform disclosure",indexedVia:"HackerOne Disclosed Reports index" }));
+const incoming = sourceRows.map(item => ({ id:`h1-${item.id}`,title:clean(item.title)||"Untitled disclosure",program:clean(item.program)||"Unlisted program",researcher:clean(item.reporter)||"Anonymous",platform:"HackerOne",url:item.url,vulnerabilityClass:classify(`${item.weakness||""} ${item.title||""}`),weakness:clean(item.weakness)||null,severity:item.severity?item.severity[0].toUpperCase()+item.severity.slice(1):"Unrated",outcome:normalizeOutcome(item.substate),sourceOutcome:item.substate||null,bounty:Number(item.bounty)||null,disclosedAt:item.disclosed_at||null,votes:Number(item.votes)||0,cves:item.cve_ids||[],kind:"Platform disclosure",indexedVia:"HackerOne Disclosed Reports index" }));
 
-const context = { window: {} };
-vm.runInNewContext(fs.readFileSync(catalogPath, "utf8"), context);
-const existing = context.window.DISCLOSURE_REPORTS.filter(row => row.platform !== "HackerOne" && row.indexedVia !== "PentesterLand" && row.platform !== "Independent publications");
-const seen = new Set();
-const catalog = [...existing, ...incoming].filter(row => { const key=row.url.replace(/\/$/,"").toLowerCase();if(seen.has(key))return false;seen.add(key);return true; });
-fs.writeFileSync(catalogPath, `window.DISCLOSURE_REPORTS=${JSON.stringify(catalog)};\n`);
+const existing = readCatalog(catalogPath).filter(row => row.platform !== "HackerOne" && !String(row.indexedVia).startsWith("PentesterLand") && row.platform !== "Independent publications");
+const catalog = deduplicate([...existing, ...incoming]);
+writeCatalog(catalogPath, catalog);
 console.log(JSON.stringify({ total:catalog.length,hackerone:incoming.length,refreshedAt:new Date().toISOString() },null,2));

@@ -12,11 +12,11 @@
   <header class="site-header">
     <a class="brand" href="#top">Disclosure Index</a>
     <nav aria-label="Primary"><a href="#library">Catalog</a><a href="#sources">Collections</a><a href="#api">API</a><a href="#method">About</a></nav>
-    <a class="api-button" href="#api">API documentation</a>
+    <div class="header-actions"><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42"/><circle cx="12" cy="12" r="4"/></svg><span>Dark</span></button><a class="api-button" href="#api">API documentation</a></div>
   </header>
   <main id="top">
     <section class="catalog-intro" aria-labelledby="page-title">
-      <div><h1 id="page-title">Public vulnerability disclosures</h1><p class="collection-meta">Platform reports, platform-associated writeups, and competitive security audits · Updated 16 August 2026</p></div>
+      <div><h1 id="page-title">Public vulnerability disclosures</h1><p class="collection-meta">Platform reports, platform-associated writeups, and competitive security audits · Updated 23 August 2026</p></div>
       <dl class="collection-stats" aria-label="Collection statistics"><div><dt>Records</dt><dd id="stat-reports">—</dd></div><div><dt>Researchers</dt><dd id="stat-researchers">—</dd></div><div><dt>Collections</dt><dd id="stat-platforms">—</dd></div><div><dt>With bounty data</dt><dd id="stat-bounties">—</dd></div></dl>
     </section>
     <section class="library" id="library">
@@ -27,8 +27,9 @@
       <div class="catalog-shell">
         <aside class="filters">
           <div class="filter-title"><span>Refine results</span><button id="reset-filters" type="button">Clear all</button></div>
-          <label>Subject<select id="class-filter"><option value="">All subjects</option></select></label><label>Severity<select id="severity-filter"><option value="">All severities</option></select></label><label>Publication year<select id="year-filter"><option value="">Any year</option></select></label><label>Material type<select id="kind-filter"><option value="">All types</option></select></label>
+          <label>Technology<select id="technology-filter"><option value="">All technologies</option></select></label><label>Report status<select id="status-filter"><option value="">All statuses</option></select></label><label>Subject<select id="class-filter"><option value="">All subjects</option></select></label><label>Severity<select id="severity-filter"><option value="">All severities</option></select></label><label>Publication year<select id="year-filter"><option value="">Any year</option></select></label><label>Material type<select id="kind-filter"><option value="">All types</option></select></label>
           <label class="saved-toggle"><input id="saved-only" type="checkbox"><span>Saved records only</span></label>
+          <div class="use-note" role="note"><b>Educational and research use only</b><p>Only test systems you own or have explicit authorization to assess. This index does not grant permission to access, test, or exploit any third-party system.</p></div>
           <div class="collection-note"><b>Scope note</b><p>Official feeds and archived platform-attributed disclosures. Every record links to its public source.</p><a href="#method">Collection policy</a></div>
         </aside>
         <section class="results" aria-label="Search results">
@@ -40,12 +41,12 @@
     </section>
     <section class="api-section" id="api">
       <div class="section-heading"><p class="eyebrow">API</p><h2>Query the catalog</h2><p>Read-only JSON with field filters, sorting, pagination, CORS, and a default limit of 120 requests per minute per client.</p></div>
-      <div class="api-docs"><div class="endpoint"><span>GET</span><code>/api/reports?q=xss&amp;severity=high&amp;limit=25</code><button type="button" data-copy="/api/reports?q=xss&severity=high&limit=25">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/reports/{id}</code><button type="button" data-copy="/api/reports/{id}">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/stats</code><button type="button" data-copy="/api/stats">Copy</button></div><p><b>Filters</b> <code>q</code> <code>platform</code> <code>severity</code> <code>class</code> <code>researcher</code> <code>program</code> <code>year</code> <code>kind</code> <code>sort</code> <code>limit</code> <code>offset</code></p></div>
+      <div class="api-docs"><div class="endpoint"><span>GET</span><code>/api/reports?q=xss&amp;technology=api&amp;status=paid</code><button type="button" data-copy="/api/reports?q=xss&technology=api&status=paid">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/reports/{id}</code><button type="button" data-copy="/api/reports/{id}">Copy</button></div><div class="endpoint"><span>GET</span><code>/api/stats</code><button type="button" data-copy="/api/stats">Copy</button></div><p><b>Filters</b> <code>q</code> <code>platform</code> <code>technology</code> <code>status</code> <code>severity</code> <code>class</code> <code>researcher</code> <code>program</code> <code>year</code> <code>kind</code> <code>sort</code> <code>limit</code> <code>offset</code></p></div>
     </section>
     <section class="method" id="method"><div class="section-heading"><p class="eyebrow">Method</p><h2>Collection policy</h2></div><div class="method-grid"><article><b>01</b><h3>Public records</h3><p>Platform disclosures, platform-associated writeups, and published audit results.</p></article><article><b>02</b><h3>Source links</h3><p>Every record retains its canonical URL, attribution, source, and date.</p></article><article><b>03</b><h3>Subject indexing</h3><p>Normalized subjects support cross-platform search; source labels remain when available.</p></article></div></section>
   </main>
-  <footer><p>11,304 records · Updated 16 August 2026</p><nav aria-label="Footer"><a href="#sources">Sources</a><a href="#api">API</a><a href="#method">Collection policy</a></nav></footer>
+  <footer><p>11,338 records · Updated 23 August 2026</p><nav aria-label="Footer"><a href="#sources">Sources</a><a href="#api">API</a><a href="#method">Collection policy</a></nav></footer>
   <dialog id="report-dialog"><button class="dialog-close" type="button" aria-label="Close">×</button><div id="dialog-content"></div></dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="data/catalog.js?v=20260816"></script><script src="app.js?v=20260816c"></script>
+  <script src="data/catalog.js"></script><script src="app.js"></script>
 </body>
 </html>
